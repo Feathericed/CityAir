@@ -15,11 +15,36 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.cityair.ui.theme.CityAirTheme
 //import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.CoroutineScope
+//import kotlinx.coroutines.Dispatchers.
 import kotlinx.coroutines.launch
 import com.cityair.data.remote.RetrofitClient
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.http.GET
+//import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import retrofit2.http.Path
+import retrofit2.http.Query
+import com.cityair.data.remote.WaqiResponse
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.async
+import kotlinx.coroutines.*
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+//import kotlinx.coroutines.launch
+interface ApiService {
+    @GET("feed/{city}/")
+    suspend fun getPost(
+        @Path("city") city: String,
+        @Query("token") token: String
+    ):  WaqiResponse
+}
 //import androidx.lifecycle.viewmodel.compose.viewModel
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,26 +64,48 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Log.d("MainActivity", "Greeting: $name")
+fun Greeting(name: String,  modifier: Modifier = Modifier) {
+    var resultText by remember {mutableStateOf("") }
+        Log.d("MainActivity", "Greeting: $name")
     val temp = BuildConfig.API_KEY
-    Log.d("MainActivity", "Greeting: $temp")
-    //setContentView(R.layout.activity_main)
 
+    Log.d("MainActivity", "bla : $temp")
+    //setContentView(R.layout.activity_main)
+    // 1. Initialize Retrofit
+    val retrofit = Retrofit.Builder()
+        .baseUrl("https://api.waqi.info/")
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+    Log.d("MainActivity", "Greeting: retrofit")
+    val apiService = retrofit.create(ApiService::class.java)
+    Log.d("MainActivity", "Greeting: apiService")
+    //
     // Launch API call in a coroutine scope tied to the Activity lifecycle
-    lifecycleScope.launch {
-        try {
-            val posts = RetrofitClient.apiService.getAirQuality("toronto",temp)
-            Log.d("API_SUCCESS", "Title: ${posts}")
-            /*for (post in posts) {
+    //kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO)
+        //.launch(   ) {
+
+    CoroutineScope(Dispatchers.IO).launch {
+            try {
+            //val posts = //RetrofitClient.apiService.getAirQuality("toronto",temp)
+                val post = apiService.getPost("toronto",temp)
+                Log.d("MainActivity", " called")
+            println("Post Title: ${post.status}")
+            Log.d("API_SUCCESS", "Title: ${post.data?.aqi?: "N/A"}")
+                resultText =  withContext(Dispatchers.Main) {"${post.data?.aqi?: "N/A"}"}
+
+                //val sortedNames = remember { rawNames.sorted() }
+
+                /*for (post in posts) {
                 Log.d("API_SUCCESS", "Title: ${post.title}")
             }*/
         } catch (e: Exception) {
-            Log.e("API_ERROR", "Failed to fetch data: ${e.message}")
+            Log.e("API_ERROR", "er: ${e.message}")
+                //name = e.message.toString()
         }
     }
+
     Text(
-        text = "Hello $name!",
+        text = "Hello $name $resultText!",
         modifier = modifier
     )
 }
@@ -66,7 +113,8 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
+
     CityAirTheme {
-        Greeting("Android")
+        Greeting("Android" )
     }
 }

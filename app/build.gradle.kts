@@ -84,6 +84,8 @@ dependencies {
     implementation("androidx.compose.ui:ui:1.11.4")
     debugImplementation("androidx.compose.ui:ui-tooling:1.11.4")
     implementation("androidx.navigation:navigation-compose:2.9.8")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0")
+    //implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0")
     ksp("androidx.room:room-compiler:2.8.4")
 }
 

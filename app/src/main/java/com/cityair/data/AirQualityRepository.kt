@@ -1,5 +1,6 @@
 package com.cityair.data
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -13,13 +14,21 @@ import retrofit2.converter.gson.GsonConverterFactory
 import com.cityair.data.remote.WaqiResponse
 import com.cityair.data.local.CityEntity
 import com.cityair.data.local.CityDao
+import com.cityair.data.local.AppDatabase
 import com.cityair.data.remote.RetrofitClient
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.Flow
-class AirQualityRepository{
-    private val cityDao: CityDao
+class AirQualityRepository(context: Context){/*
+    private val cityDao: CityDao = AppDatabase.getDatabase(context).cityDao()
+
 }{
+    val allCities: StateFlow<List<CityEntity>> = cityDao.getAllCities()
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            emptyList()
+        )
     fun getAllCities(): Flow<List<CityEntity>> {
         return cityDao.getAllCities()
     }
@@ -92,5 +101,5 @@ class AirQualityViewModelFactory(
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return AirQualityViewModel(respository) as T
 
-    }
+    }*/
 }

@@ -1,7 +1,7 @@
 package com.cityair.data.remote
 
 import retrofit2.Retrofit
-import retrofit2.converter.gson:GsonConverterFactory
+import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
     private const val BASE_URL = "https://typicode.com"

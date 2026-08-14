@@ -19,7 +19,7 @@ import com.cityair.data.AirQualityViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CityListPage(viewModel: AirQualityViewModel,
-                 onCityCLick:(String) -> Unit,
+                 onCityClick:(String) -> Unit,
                  onReportClick:() -> Unit){
     val cities by viewModel.cities.collectAsState()
     val cityInput = remember { mutableStateOf("") }
@@ -70,7 +70,7 @@ fun CityListPage(viewModel: AirQualityViewModel,
 				items(cities){ city ->
 					CityRow (city = city,
 						onClick={
-							onCityCLick(city.name)
+							onCityClick(city.name)
 						},
 						onDelete = {
 							viewModel.deleteCity(city.name)

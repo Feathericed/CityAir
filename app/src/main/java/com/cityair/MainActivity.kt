@@ -1,5 +1,6 @@
 package com.cityair
 
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -47,6 +48,7 @@ import com.cityair.data.remote.WaqiApi
 import com.cityair.data.remote.WaqiData
 import com.cityair.data.AirQualityRepository
 import com.cityair.data.AirQualityViewModelFactory
+import com.cityair.data.*
 import androidx.room.RoomDatabase
 import com.cityair.data.AirQualityViewModel
 import androidx.navigation.compose.NavHost
@@ -76,12 +78,17 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             CityAirTheme {
+                val viewModel: AirQualityViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+                    factory = factory
+                )
+                CityAirApp(viewModel)
+                /*
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Greeting(
                         name = "Android",
                         modifier = Modifier.padding(innerPadding)
                     )
-                }
+                }*/
             }
         }
     }
@@ -153,13 +160,13 @@ fun CityAirApp(viewModel: AirQualityViewModel){
         composable("cities"){
             CityListPage(
                 viewModel = viewModel,
-                OnCityClick = {cityName ->
+                onCityClick = { cityName ->
                     navController.navigate("details/${Uri.encode(cityName)}")},
-                OnReportClick ={navController.navigate("report")}
+                onReportClick ={navController.navigate("report")}
             )
         }
         composable(
-            route = "detail/{cityName}",
+            route = "details/{cityName}",
             arguments = listOf(
                 navArgument("cityName"){
                     type = NavType.StringType
@@ -170,7 +177,7 @@ fun CityAirApp(viewModel: AirQualityViewModel){
             AirQualityDetailPage(
                 cityName = cityName,
                 viewModel = viewModel,
-                OnBackClick ={
+                onBackClick ={
                     navController.popBackStack()
                 }
             )
@@ -179,7 +186,7 @@ fun CityAirApp(viewModel: AirQualityViewModel){
         composable("report"){
             ReportPage(
                 viewModel = viewModel,
-                OnBackClick ={
+                onBackClick ={
                     navController.popBackStack()
                 }
             )

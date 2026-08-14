@@ -62,7 +62,7 @@ fun AirQualityDetailPage(
 				state.result != null ->{
 					val data = state.result.data
 					Card(
-						modifier = Modifier.height(8.dp))
+						modifier = Modifier.height(8.dp)
 					) {
 						Column(
 							modifier = Modifier.height(16.dp)

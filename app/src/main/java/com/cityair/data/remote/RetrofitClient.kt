@@ -4,7 +4,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
-    private const val BASE_URL = "https://typicode.com"
+    private const val BASE_URL = "https://api.waqi.info/"
 
     val apiService: WaqiApi by lazy {
         Retrofit.Builder()

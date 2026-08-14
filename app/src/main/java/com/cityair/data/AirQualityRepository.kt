@@ -1,6 +1,7 @@
 package com.cityair.data
 
 import android.content.Context
+import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -21,9 +22,25 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.Flow
 //import CoroutineScope.viewModelScope
 import androidx.lifecycle.viewModelScope
+import com.cityair.BuildConfig
 
 class AirQualityRepository(context: Context){
     private val cityDao: CityDao = AppDatabase.getDatabase(context).cityDao()
+    suspend fun getAirQuality1(cityName: String) :AirQualityResult {
+
+        return try {
+            val rseponse = RetrofitClient.apiService.getAirQuality(city = cityName, token  = "88503d06b3f0d48fab82af922227d1d1741ff694")
+            if(rseponse.status == "ok") {
+                AirQualityResult.Success(rseponse)
+            }else{
+                AirQualityResult.Error("No air quality data found for $cityName")
+            }
+        } catch (e: Exception) {
+            AirQualityResult.Error(e.message ?: "Unknown error")
+        }
+    }
+
+
 
 /*
     val allCities: StateFlow<List<CityEntity>> = cityDao.getAllCities()
@@ -55,8 +72,14 @@ class AirQualityRepository(context: Context){
         return RetrofitClient.apiService.getAirQuality(city = cityName, token  = "88503d06b3f0d48fab82af922227d1d1741ff694")
     }*/
     suspend fun getAirQuality(cityName: String): WaqiResponse {
-        return RetrofitClient.apiService.getAirQuality(city = cityName, token  = "88503d06b3f0d48fab82af922227d1d1741ff694")
+        return RetrofitClient.apiService.getAirQuality(city = cityName, token  = BuildConfig.API_KEY)
     }
+}
+sealed class AirQualityResult {
+    data object Loading: AirQualityResult()
+    data class Success(val data: WaqiResponse): AirQualityResult()
+    data class Error(val message: String): AirQualityResult()
+    data object Empty: AirQualityResult()
 }
 data class AirQualityUiState(
     val isLoading: Boolean = false,
@@ -97,6 +120,7 @@ class AirQualityViewModel(
                 }
             }catch (e: Exception) {
                 airQuality.value = AirQualityUiState(errorMessage = e.message ?:"Failed to load air quality date")
+                //Toast.makeText(context, "Error: Connection timed out!", Toast.LENGTH_LONG).show()
             }
         }
     }

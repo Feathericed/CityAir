@@ -1,5 +1,6 @@
 package com.example.cityair
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.foundation.clickable
@@ -20,6 +21,16 @@ import com.cityair.data.*
 import com.cityair.ui.*
 
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.setValue
+import com.cityair.ApiService
+import com.cityair.BuildConfig
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AirQualityDetailPage(
@@ -52,10 +63,13 @@ fun AirQualityDetailPage(
 			Spacer(modifier = Modifier.height(16.dp))
 			Text("City: $cityName") 
 			Spacer(modifier = Modifier.height(16.dp))
+			LoadCityAirAuqlityDetail(cityName)
+
 			when{
 				state.isLoading ->{
 					CircularProgressIndicator()
 				}
+
 				state.errorMessage != null ->{
 					Text("Error: ${state.errorMessage}")
 				}
@@ -73,6 +87,7 @@ fun AirQualityDetailPage(
 								color = aqiColor(data?.aqi))
 							Text("Status ID : ${data?.idx ?: "N/A"}")
 							Text("Update Time: ${data?.time?.s ?: "N/A"}")
+							Spacer(modifier = Modifier.height(12.dp))
 							Text(text = getAqiDescription(data?.aqi))
 						}
 						
@@ -84,7 +99,52 @@ fun AirQualityDetailPage(
 	}
     
 }
+@Composable
+fun LoadCityAirAuqlityDetail(name: String,  modifier: Modifier = Modifier) {
+	var resultText by remember {mutableStateOf("") }
+	Log.d("MainActivity", "Greeting: $name")
+	val temp = BuildConfig.API_KEY
 
+	Log.d("MainActivity", "bla : $temp")
+	//setContentView(R.layout.activity_main)
+	// 1. Initialize Retrofit
+	val retrofit = Retrofit.Builder()
+		.baseUrl("https://api.waqi.info/")
+		.addConverterFactory(GsonConverterFactory.create())
+		.build()
+	Log.d("MainActivity", "Greeting: retrofit")
+	val apiService = retrofit.create(ApiService::class.java)
+	Log.d("MainActivity", "Greeting: apiService")
+	//
+	// Launch API call in a coroutine scope tied to the Activity lifecycle
+	//kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO)
+	//.launch(   ) {
+
+	CoroutineScope(Dispatchers.IO).launch {
+		try {
+			//val posts = //RetrofitClient.apiService.getAirQuality("toronto",temp)
+			val post = apiService.getPost(name,temp)
+			Log.d("MainActivity", " called")
+			println("Post Title: ${post.status}")
+			Log.d("API_SUCCESS", "Title: ${post.data?.aqi?: "N/A"}")
+			resultText =  withContext(Dispatchers.Main) {"${post.data?: "N/A"}"}
+
+			//val sortedNames = remember { rawNames.sorted() }
+
+			/*for (post in posts) {
+            Log.d("API_SUCCESS", "Title: ${post.title}")
+        }*/
+		} catch (e: Exception) {
+			Log.e("API_ERROR", "er: ${e.message}")
+			//name = e.message.toString()
+		}
+	}
+
+	Text(
+		text = "bla:  $resultText!",
+		modifier = modifier
+	)
+}
 fun getAqiDescription(aqi: Int?): String{
 	return when {
 		aqi == null ->"No AQI value available"

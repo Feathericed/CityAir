@@ -14,16 +14,25 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.lifecycle.viewmodel.compose.rememberViewModelStoreProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cityair.data.AirQualityViewModel
+import com.cityair.data.AirQualityRepository
+import com.cityair.data.AirQualityViewModelFactory
+import androidx.lifecycle.ViewModelProvider
+//import androidx.appcompat.app.AlertDialog
+import androidx.compose.material3.AlertDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CityListPage(viewModel: AirQualityViewModel,
+fun CityListPage(viewModel: AirQualityViewModel= androidx.lifecycle.viewmodel.compose.viewModel() ,
                  onCityClick:(String) -> Unit,
                  onReportClick:() -> Unit){
+	//val viewModel= //AirQualityViewModel(AirQualityRepository(this))
+	//val viewModel by AirQualityViewModel(AirQualityRepository(this))
     val cities by viewModel.cities.collectAsState()
     val cityInput = remember { mutableStateOf("") }
-    
+	val isDialogOpen = remember { mutableStateOf(false) }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -53,10 +62,29 @@ fun CityListPage(viewModel: AirQualityViewModel,
 					onClick = {
 						viewModel.addCity(cityInput.value)
 						cityInput.value = ""
+
 					}
 				){
 					Text("Add City")
-				}
+				}/*
+				if (!viewModel.warningText.trim().isNullOrEmpty()) {
+						isDialogOpen.value = true
+						AlertDialog(
+							onDismissRequest = { isDialogOpen.value = false
+								},
+							title = { Text(text = "Invalid Input") },
+							text = { Text(text = viewModel.warningText) }, // Displays the precise error message
+							confirmButton = {
+								Button(onClick = {
+									isDialogOpen.value = false
+								}) {
+									Text(text = "OK")
+								}
+							}
+						)
+					viewModel.clearWarning()
+
+				}*/
 				Button(
 					onClick = onReportClick
 				){

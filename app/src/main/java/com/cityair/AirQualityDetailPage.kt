@@ -30,7 +30,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AirQualityDetailPage(
@@ -39,6 +39,13 @@ fun AirQualityDetailPage(
 	onBackClick: ()-> Unit
 ){
 	val state = viewModel.airQuality.value
+	val showWarning by viewModel.showWarningDialog.collectAsStateWithLifecycle()
+	//val errorMessageText by viewModel.warningText.collectAsStateWithLifecycle()
+
+	// Render layout content here...
+
+	// Automatically display the UI element whenever state updates to true
+
 	LaunchedEffect(cityName){
 		viewModel.loadAirQuality(cityName)
 	}
@@ -51,19 +58,19 @@ fun AirQualityDetailPage(
 	){padding ->
 		Column (
 			modifier = Modifier
-			.padding(padding)
-			.padding(16.dp)
-            .fillMaxSize()
+				.padding(padding)
+				.padding(16.dp)
+				.fillMaxSize()
 		){
 			Button(
-					onClick = onBackClick
-				){
-					Text("Back")
-				}
+				onClick = onBackClick
+			){
+				Text("Back")
+			}
 			Spacer(modifier = Modifier.height(16.dp))
-			Text("City: $cityName") 
+			Text("City: $cityName")
 			Spacer(modifier = Modifier.height(16.dp))
-			LoadCityAirAuqlityDetail(cityName)
+
 
 			when{
 				state.isLoading ->{
@@ -72,32 +79,36 @@ fun AirQualityDetailPage(
 
 				state.errorMessage != null ->{
 					Text("Error: ${state.errorMessage}")
+					Spacer(modifier = Modifier.height(16.dp))
 				}
 				state.result != null ->{
 					val data = state.result.data
 					Card(
 						modifier = Modifier.height(8.dp)
+
 					) {
 						Column(
 							modifier = Modifier.height(16.dp)
 						){
-							Text("Status: ${state.result.status}")
-							Text("Station: ${data?.city?.name ?: "Unknow"}")
+							Text("Status: ${state.result.status}",modifier = Modifier.height(16.dp))
+							Text("Station: ${data?.city?.name ?: "Unknow"}",modifier = Modifier.height(16.dp))
 							Text(text = "AQI: ${data?.aqi ?: "N/A"}",
 								color = aqiColor(data?.aqi))
 							Text("Status ID : ${data?.idx ?: "N/A"}")
+							Spacer(modifier = Modifier.height(16.dp))
 							Text("Update Time: ${data?.time?.s ?: "N/A"}")
 							Spacer(modifier = Modifier.height(12.dp))
 							Text(text = getAqiDescription(data?.aqi))
 						}
-						
+
 					}
-					
+
 				}
 			}
+			LoadCityAirAuqlityDetail(cityName)
 		}
 	}
-    
+
 }
 @Composable
 fun LoadCityAirAuqlityDetail(name: String,  modifier: Modifier = Modifier) {
@@ -119,11 +130,11 @@ fun LoadCityAirAuqlityDetail(name: String,  modifier: Modifier = Modifier) {
 	// Launch API call in a coroutine scope tied to the Activity lifecycle
 	//kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO)
 	//.launch(   ) {
-
+	var post = WaqiResponse("ok",null)
 	CoroutineScope(Dispatchers.IO).launch {
 		try {
 			//val posts = //RetrofitClient.apiService.getAirQuality("toronto",temp)
-			val post = apiService.getPost(name,temp)
+			 post = apiService.getPost(name,temp)
 			Log.d("MainActivity", " called")
 			println("Post Title: ${post.status}")
 			Log.d("API_SUCCESS", "Title: ${post.data?.aqi?: "N/A"}")
@@ -139,11 +150,29 @@ fun LoadCityAirAuqlityDetail(name: String,  modifier: Modifier = Modifier) {
 			//name = e.message.toString()
 		}
 	}
-
-	Text(
-		text = "bla:  $resultText!",
-		modifier = modifier
-	)
+	if ("ok".equals(post.status)){
+		Text(text = "Status: ${post.status}", modifier = modifier)
+		Text(
+			text = "AQI: ${post.data?.aqi}",
+			color = aqiColor(post.data?.aqi),
+			modifier = modifier
+		)
+		Text(text="Station: ${post.data?.city?.name ?: "Unknow"}", modifier = modifier)
+		Text("Idx : ${post.data?.idx}", modifier = modifier)
+		Text("${resultText}",
+			modifier = modifier)
+		/*
+		Text("Status: ${post.status}")
+		Spacer(modifier = Modifier.height(16.dp))
+		Text("Station: ${post.data?.city?.name ?: "Unknow"}")
+		Spacer(modifier = Modifier.height(16.dp))
+		Text(text = "AQI: ${post.data?.aqi ?: "N/A"}",
+			color = aqiColor(post.data?.aqi))
+		Text("Status ID : ${post.data?.idx ?: "N/A"}")
+		Text("Update Time: ${post.data?.time?.s ?: "N/A"}")
+		Spacer(modifier = Modifier.height(12.dp))
+		Text(text = getAqiDescription(data?.aqi))*/
+	}
 }
 fun getAqiDescription(aqi: Int?): String{
 	return when {
@@ -157,7 +186,7 @@ fun getAqiDescription(aqi: Int?): String{
 	}
 }
 // add json response reading
-fun aqiColor(aqi: Int?): Color{
+fun aqiColor(aqi: Int?): Color {
 	return when {
 		aqi == null -> Color.Gray
 		aqi <= 50 -> Color.Green

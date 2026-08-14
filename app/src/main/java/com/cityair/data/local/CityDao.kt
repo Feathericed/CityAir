@@ -13,7 +13,10 @@ interface CityDao{
 	fun getAllCities(): Flow<List<CityEntity>>
 	@Insert(onConflict = OnConflictStrategy.IGNORE)
 	suspend fun addCity(city: CityEntity)
-	//@Update
+
+	@Query("SELECT COUNT(*) FROM cities WHERE name =:cityName")
+	suspend fun findCity(cityName: String): Int?
+
 	@Delete
 	suspend fun deleteCity(city: CityEntity)
 	@Query("DELETE FROM cities WHERE name =:cityName")

@@ -2,6 +2,8 @@ package com.cityair.data
 
 import android.content.Context
 import android.widget.Toast
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Text
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -23,7 +25,11 @@ import kotlinx.coroutines.flow.Flow
 //import CoroutineScope.viewModelScope
 import androidx.lifecycle.viewModelScope
 import com.cityair.BuildConfig
-
+//import android.app.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.runtime.Composable
+import com.cityair.data.AirQualityViewModel
+import androidx.appcompat.app.AlertDialog
 class AirQualityRepository(context: Context){
     private val cityDao: CityDao = AppDatabase.getDatabase(context).cityDao()
     suspend fun getAirQuality1(cityName: String) :AirQualityResult {
@@ -52,10 +58,19 @@ class AirQualityRepository(context: Context){
     fun getAllCities(): Flow<List<CityEntity>> {
         return cityDao.getAllCities()
     }
-    suspend fun addCity(cityName: String) {
+    suspend fun addCity(cityName: String): Int {
         val cleanedName = cityName.trim()
-        if(cleanedName.isNotEmpty()) {
+        if(cleanedName.isNotEmpty() && cityDao.findCity(cleanedName) == 0) {
             cityDao.addCity(CityEntity(name = cleanedName))
+            return 1
+        }else{
+            if(cleanedName.isNotEmpty() )
+                return 0
+            else if((cityDao.findCity(cleanedName)?:0) > 0){
+                return -1
+            }else {
+                return -2
+            }
         }
     }
     suspend fun deleteCity(city: CityEntity) {
@@ -64,7 +79,7 @@ class AirQualityRepository(context: Context){
     }
     suspend fun deleteCity(cityName: String) {
         val cleanedName = cityName.trim()
-        if(cleanedName.isNotEmpty()) {
+        if(cleanedName.isNotEmpty() && (cityDao.findCity(cleanedName) ?: 0)>0) {
             cityDao.deleteCity(CityEntity(name = cleanedName))
         }
     }/*
@@ -98,11 +113,35 @@ class AirQualityViewModel(
             )
     var airQuality = androidx.compose.runtime.mutableStateOf(AirQualityUiState())
         private set
+    // 1. Internal state tracker (starts as false)
+    private val _showWarningDialog = MutableStateFlow(false)
+    var warningText: String = ""
+    // 2. Publicly read-only state flow exposed to your UI Composable
+    val showWarningDialog: StateFlow<Boolean> = _showWarningDialog.asStateFlow()
+
+    // 3. YOUR FUNCTION: Changes state to false, closing the warning box
+    public final fun clearWarning() {
+        _showWarningDialog.value = false
+        warningText = ""
+    }
+    //val showDialog by viewModel.showWarningDialog.collectAsStateWithLifecycle()
     fun addCity(cityName: String) {
         viewModelScope.launch {
-            respository.addCity(cityName)
+            val rtn = respository.addCity(cityName)
+            if (rtn!=1){
+                _showWarningDialog.value = true
+                if (rtn == 0)
+                    warningText = "City name cannot be duplicate"
+                else if (rtn == -1){
+                    warningText = ""}
+                else
+                    warningText = "City name cannot be add something is wrong"
+            }
         }
     }
+
+
+
     fun deleteCity(cityName: String) {
         viewModelScope.launch {
             respository.deleteCity(cityName)

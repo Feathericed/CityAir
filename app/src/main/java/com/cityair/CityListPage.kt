@@ -64,14 +64,20 @@ fun CityListPage(viewModel: AirQualityViewModel= androidx.lifecycle.viewmodel.co
 			Row(
 				horizontalArrangement = Arrangement.spacedBy(8.dp)
 			){
+				val exists =cities.any(){
+					it.name.equals(cityInput.value.trim(), ignoreCase =true)
+				}
 				Button(
 					onClick = {
-						viewModel.addCity(cityInput.value)
-						cityInput.value = ""
+						if(!exists){
+							viewModel.addCity(cityInput.value)
+							cityInput.value = ""
+						}
+
 
 					}
 				){
-					Text("Add City")
+					Text(if(exists)"City Already Exist" else "Add City")
 				}/*
 				if (!viewModel.warningText.trim().isNullOrEmpty()) {
 						isDialogOpen.value = true

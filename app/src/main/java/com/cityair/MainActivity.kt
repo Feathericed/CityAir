@@ -38,6 +38,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 //import kotlinx.coroutines.launch
+import com.cityair.BuildConfig
+import com.cityair.data.local.AppDatabase
+import com.cityair.data.local.CityDao
+import com.cityair.data.local.CityEntity
+import com.cityair.data.remote.WaqiApi
+import com.cityair.data.remote.WaqiData
+import com.cityair.data.AirQualityRepository
+import com.cityair.data.AirQualityViewModelFactory
+import androidx.room.RoomDatabase
 interface ApiService {
     @GET("feed/{city}/")
     suspend fun getPost(
@@ -49,6 +58,13 @@ interface ApiService {
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val database = AppDatabase.getDatabase(this)
+        Log.d("MainActivity", "Greeting: 1")
+        val repository = AirQualityRepository(database.cityDao())
+        Log.d("MainActivity", "Greeting: 2")
+        val factory = AirQualityViewModelFactory(repository)
+        Log.d("MainActivity", "Greeting: 3")
+
         enableEdgeToEdge()
         setContent {
             CityAirTheme {
@@ -87,7 +103,7 @@ fun Greeting(name: String,  modifier: Modifier = Modifier) {
     CoroutineScope(Dispatchers.IO).launch {
             try {
             //val posts = //RetrofitClient.apiService.getAirQuality("toronto",temp)
-                val post = apiService.getPost("toronto",temp)
+                val post = apiService.getPost("vancouver",temp)
                 Log.d("MainActivity", " called")
             println("Post Title: ${post.status}")
             Log.d("API_SUCCESS", "Title: ${post.data?.aqi?: "N/A"}")

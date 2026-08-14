@@ -22,6 +22,8 @@ import com.cityair.ui.*
 
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import com.cityair.ApiService
 import com.cityair.BuildConfig
 import kotlinx.coroutines.CoroutineScope
@@ -32,6 +34,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.json.JSONObject
+import androidx.compose.ui.text.withStyle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -154,13 +157,37 @@ fun LoadCityAirAuqlityDetail(name: String,  modifier: Modifier = Modifier) {
 	}
 	if ("ok".equals(post.status)){
 		Text(text = "Status: ${post.status}", modifier = modifier)
+
+		val multiColorString = buildAnnotatedString {
+			withStyle(style = SpanStyle(color = Color.Blue)) {
+				append("AQI: ${post.data?.aqi} ${getAqiDescription(post.data?.aqi)}")
+			}
+			//append(" | ")
+			withStyle(style = SpanStyle(color =  aqiColor(post.data?.aqi))) {
+				append(" \u2588")
+			}
+			/*
+			// 1. First colored section (Green)
+			withStyle(style = SpanStyle(color = Color(0xFF4CAF50))) {
+				append("Good \\u2588")
+			}
+
+			append(" | ") // Plain separator text
+
+			// 2. Second colored section (Yellow/Orange)
+			withStyle(style = SpanStyle(color = Color(0xFFFFB300))) {
+				append("Moderate \\u2588")
+			}
+
+			append(" | ") // Plain separator text
+
+			// 3. Third colored section (Red)
+			withStyle(style = SpanStyle(color = Color(0xFFF44336))) {
+				append("Unhealthy \\u2588")
+			}*/
+		}
 		Text(
-			text = "AQI: ${post.data?.aqi}",
-			modifier = modifier
-		)
-		Text(
-			text = "AQI: ${post.data?.aqi}",
-			color = aqiColor(post.data?.aqi),
+			text = multiColorString,
 			modifier = modifier
 		)
 		Text(text="Station: ${post.data?.city?.name ?: "Unknow"}", modifier = modifier)
@@ -169,6 +196,7 @@ fun LoadCityAirAuqlityDetail(name: String,  modifier: Modifier = Modifier) {
 		Text("CO: ${post.data?.iaqi?.co?.v ?: "N/A"}")
 		Text("O3: ${post.data?.iaqi?.o3?.v ?: "N/A"}")
 		Text("PM 25: ${post.data?.iaqi?.pm25?.v ?: "N/A"}")
+		Text("So2: ${post.data?.iaqi?.so2?.v ?: "N/A"}")
 
 		Text("${resultText}",
 			modifier = modifier)

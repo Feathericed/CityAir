@@ -60,7 +60,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val database = AppDatabase.getDatabase(this)
         Log.d("MainActivity", "Greeting: 1")
-        val repository = AirQualityRepository(database.cityDao())
+        val repository = AirQualityRepository(this)
         Log.d("MainActivity", "Greeting: 2")
         val factory = AirQualityViewModelFactory(repository)
         Log.d("MainActivity", "Greeting: 3")

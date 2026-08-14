@@ -19,23 +19,26 @@ import com.cityair.data.remote.RetrofitClient
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.Flow
-class AirQualityRepository(context: Context){/*
+//import CoroutineScope.viewModelScope
+import androidx.lifecycle.viewModelScope
+
+class AirQualityRepository(context: Context){
     private val cityDao: CityDao = AppDatabase.getDatabase(context).cityDao()
 
-}{
+/*
     val allCities: StateFlow<List<CityEntity>> = cityDao.getAllCities()
         .stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5000),
             emptyList()
-        )
+        )*/
     fun getAllCities(): Flow<List<CityEntity>> {
         return cityDao.getAllCities()
     }
     suspend fun addCity(cityName: String) {
         val cleanedName = cityName.trim()
         if(cleanedName.isNotEmpty()) {
-            cityDao.addCity(CityEntity(name = cityName))
+            cityDao.addCity(CityEntity(name = cleanedName))
         }
     }
     suspend fun deleteCity(city: CityEntity) {
@@ -45,10 +48,13 @@ class AirQualityRepository(context: Context){/*
     suspend fun deleteCity(cityName: String) {
         val cleanedName = cityName.trim()
         if(cleanedName.isNotEmpty()) {
-            cityDao.deleteCity(CityEntity(name = cityName))
+            cityDao.deleteCity(CityEntity(name = cleanedName))
         }
-    }
+    }/*
     suspend fun getAllCities(cityName: String): WaqiResponse {
+        return RetrofitClient.apiService.getAirQuality(city = cityName, token  = "88503d06b3f0d48fab82af922227d1d1741ff694")
+    }*/
+    suspend fun getAirQuality(cityName: String): WaqiResponse {
         return RetrofitClient.apiService.getAirQuality(city = cityName, token  = "88503d06b3f0d48fab82af922227d1d1741ff694")
     }
 }
@@ -101,5 +107,5 @@ class AirQualityViewModelFactory(
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return AirQualityViewModel(respository) as T
 
-    }*/
+    }
 }

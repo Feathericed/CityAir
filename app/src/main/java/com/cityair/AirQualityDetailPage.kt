@@ -166,8 +166,9 @@ fun LoadCityAirAuqlityDetail(name: String,  modifier: Modifier = Modifier) {
 		Text(text="Station: ${post.data?.city?.name ?: "Unknow"}", modifier = modifier)
 		Text("Idx : ${post.data?.idx}", modifier = modifier)
 		Text("Update Time: ${post.data?.time?.s ?: "N/A"}")
-		Text("CO: ${post.data?.iaqi?.co ?: "N/A"}")
-		Text("PM 25: ${post.data?.iaqi?.pm25 ?: "N/A"}")
+		Text("CO: ${post.data?.iaqi?.co?.v ?: "N/A"}")
+		Text("O3: ${post.data?.iaqi?.o3?.v ?: "N/A"}")
+		Text("PM 25: ${post.data?.iaqi?.pm25?.v ?: "N/A"}")
 
 		Text("${resultText}",
 			modifier = modifier)

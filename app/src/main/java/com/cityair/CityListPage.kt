@@ -3,6 +3,7 @@ package com.cityair
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
@@ -26,6 +27,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.LaunchedEffect
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CityListPage(viewModel: AirQualityViewModel= androidx.lifecycle.viewmodel.compose.viewModel() ,
@@ -38,6 +41,8 @@ fun CityListPage(viewModel: AirQualityViewModel= androidx.lifecycle.viewmodel.co
 	val isDialogOpen = remember { mutableStateOf(false) }
 	var showDeleteDialog by remember { mutableStateOf(false) }
 	var cn = ""
+	val listState =rememberLazyListState()
+
 	Scaffold(
         topBar = {
             TopAppBar(
@@ -106,7 +111,8 @@ fun CityListPage(viewModel: AirQualityViewModel= androidx.lifecycle.viewmodel.co
 			Spacer(modifier = Modifier.height(16.dp))
 			Text("Saved Cities")
 			Spacer(modifier = Modifier.height(8.dp))
-			LazyColumn{
+			LazyColumn(modifier = Modifier.fillMaxWidth().weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)){
+
 				items(cities){ city ->
 					CityRow (city = city,
 						onClick={
@@ -119,7 +125,12 @@ fun CityListPage(viewModel: AirQualityViewModel= androidx.lifecycle.viewmodel.co
 					)
 				}
 			}
+
         }
+		LaunchedEffect(cities.size) { if(cities.isNullOrEmpty()){
+			listState.animateScrollToItem(cities.size-1)
+
+		} }
 		if(showDeleteDialog && !cn.isNullOrEmpty()){
 			AlertDialog(onDismissRequest = {showDeleteDialog=false},
 				title= { Text(cn) },

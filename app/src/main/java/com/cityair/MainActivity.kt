@@ -37,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.navigation.compose.rememberNavController
 //import kotlinx.coroutines.launch
 import com.cityair.BuildConfig
 import com.cityair.data.local.AppDatabase
@@ -47,6 +48,13 @@ import com.cityair.data.remote.WaqiData
 import com.cityair.data.AirQualityRepository
 import com.cityair.data.AirQualityViewModelFactory
 import androidx.room.RoomDatabase
+import com.cityair.data.AirQualityViewModel
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
+import androidx.navigation.NavType
+import com.example.cityair.AirQualityDetailPage
+
 interface ApiService {
     @GET("feed/{city}/")
     suspend fun getPost(
@@ -132,5 +140,49 @@ fun GreetingPreview() {
 
     CityAirTheme {
         Greeting("Android" )
+    }
+}
+
+@Composable
+fun CityAirApp(viewModel: AirQualityViewModel){
+    val navController = rememberNavController()
+    NavHost(
+        navController = navController,
+        startDestination = "cities"
+    ){
+        composable("cities"){
+            CityListPage(
+                viewModel = viewModel,
+                OnCityClick = {cityName ->
+                    navController.navigate("details/${Uri.encode(cityName)}")},
+                OnReportClick ={navController.navigate("report")}
+            )
+        }
+        composable(
+            route = "detail/{cityName}",
+            arguments = listOf(
+                navArgument("cityName"){
+                    type = NavType.StringType
+                }
+            )
+        ){ backStackEntry ->
+            val cityName = backStackEntry.arguments?.getString("cityName") ?: "toronto"
+            AirQualityDetailPage(
+                cityName = cityName,
+                viewModel = viewModel,
+                OnBackClick ={
+                    navController.popBackStack()
+                }
+            )
+
+        }
+        composable("report"){
+            ReportPage(
+                viewModel = viewModel,
+                OnBackClick ={
+                    navController.popBackStack()
+                }
+            )
+        }
     }
 }

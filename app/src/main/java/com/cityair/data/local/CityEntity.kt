@@ -11,7 +11,7 @@ import androidx.room.PrimaryKey
 data class CityEntity(
 	@PrimaryKey(autoGenerate = true)
 	val id: Int = 0,
-	val name: String/*,
-	val time: String,
-	val airQuality: String*/
+	val name: String,
+	val lastUpdate: String="",
+	val aqi: Int =0
 )

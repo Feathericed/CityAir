@@ -23,7 +23,7 @@ abstract class AppDatabase : RoomDatabase(){
 				val db = Room.databaseBuilder(
 					context.applicationContext,
 					AppDatabase::class.java,
-					"air_quality_db"
+					"air_quality_db1"
 				).build()
 				INSTANCE = db
 				db

@@ -66,7 +66,7 @@ fun ReportPage(
 							.fillMaxWidth()
 					){
 						//Text("City ID: ${city.id}")
-						Text("City Name: ${city.name}")
+						Text("City Name: ${city.name} aqi: ${city.aqi} \n last update: ${city.lastUpdate}")
 					}
 				}
 			}

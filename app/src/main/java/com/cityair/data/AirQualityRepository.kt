@@ -89,6 +89,13 @@ class AirQualityRepository(context: Context){
     suspend fun getAirQuality(cityName: String): WaqiResponse {
         return RetrofitClient.apiService.getAirQuality(city = cityName, token  = BuildConfig.API_KEY)
     }
+
+    suspend fun updateCityAqi(cityName: String, aqi: Int, time: String) {
+        val cleanedName = cityName.trim()
+        if(cleanedName.isNotEmpty() && (cityDao.findCity(cleanedName) ?: 0)>0) {
+            cityDao.updateAirQuality(cityName = cleanedName, aqi = aqi, time)
+        }
+    }
 }
 sealed class AirQualityResult {
     data object Loading: AirQualityResult()
@@ -140,7 +147,11 @@ class AirQualityViewModel(
         }
     }
 
-
+    fun updateCityAqi(cityName: String,aqi: Int, time: String){
+        viewModelScope.launch {
+            respository.updateCityAqi(cityName,aqi, time )
+        }
+    }
     fun deleteCity(city: CityEntity) {
         viewModelScope.launch {
             respository.deleteCity(city)

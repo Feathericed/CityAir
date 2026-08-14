@@ -35,6 +35,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.json.JSONObject
 import androidx.compose.ui.text.withStyle
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -87,7 +88,7 @@ fun AirQualityDetailPage(
 					Spacer(modifier = Modifier.height(16.dp))
 				}
 				state.result != null ->{
-					val data = state.result.data
+					var data = state.result.data
 					Card(
 						modifier = Modifier.height(8.dp)
 
@@ -110,13 +111,15 @@ fun AirQualityDetailPage(
 
 				}
 			}
-			LoadCityAirAuqlityDetail(cityName)
+
+			val post =LoadCityAirAuqlityDetail(cityName)
+			viewModel.updateCityAqi(cityName, post.data?.aqi?: 0, post.data?.time?.s ?: "N/A")
 		}
 	}
 
 }
 @Composable
-fun LoadCityAirAuqlityDetail(name: String,  modifier: Modifier = Modifier) {
+fun LoadCityAirAuqlityDetail(name: String,  modifier: Modifier = Modifier) :WaqiResponse{
 	var resultText by remember {mutableStateOf("") }
 	Log.d("MainActivity", "Greeting: $name")
 	val temp = BuildConfig.API_KEY
@@ -201,6 +204,8 @@ fun LoadCityAirAuqlityDetail(name: String,  modifier: Modifier = Modifier) {
 		Text("PM 25: ${post.data?.iaqi?.pm25?.v ?: "N/A"}")
 		Text("So2: ${post.data?.iaqi?.so2?.v ?: "N/A"}")
 
+		//viewModel() { }
+
 		/*Text("${resultText}",
 			modifier = modifier)
 		Text("Status: ${post.status}")
@@ -214,6 +219,7 @@ fun LoadCityAirAuqlityDetail(name: String,  modifier: Modifier = Modifier) {
 		Spacer(modifier = Modifier.height(12.dp))
 		Text(text = getAqiDescription(data?.aqi))*/
 	}
+	return post
 }
 fun getAqiDescription(aqi: Int?): String{
 	return when {

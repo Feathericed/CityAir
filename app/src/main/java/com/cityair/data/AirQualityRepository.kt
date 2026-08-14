@@ -141,7 +141,11 @@ class AirQualityViewModel(
     }
 
 
-
+    fun deleteCity(city: CityEntity) {
+        viewModelScope.launch {
+            respository.deleteCity(city)
+        }
+    }
     fun deleteCity(cityName: String) {
         viewModelScope.launch {
             respository.deleteCity(cityName)

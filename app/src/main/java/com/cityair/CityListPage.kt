@@ -22,7 +22,10 @@ import com.cityair.data.AirQualityViewModelFactory
 import androidx.lifecycle.ViewModelProvider
 //import androidx.appcompat.app.AlertDialog
 import androidx.compose.material3.AlertDialog
-
+import androidx.compose.runtime.setValue
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CityListPage(viewModel: AirQualityViewModel= androidx.lifecycle.viewmodel.compose.viewModel() ,
@@ -33,7 +36,9 @@ fun CityListPage(viewModel: AirQualityViewModel= androidx.lifecycle.viewmodel.co
     val cities by viewModel.cities.collectAsState()
     val cityInput = remember { mutableStateOf("") }
 	val isDialogOpen = remember { mutableStateOf(false) }
-    Scaffold(
+	var showDeleteDialog by remember { mutableStateOf(false) }
+	var cn = ""
+	Scaffold(
         topBar = {
             TopAppBar(
                 title = {
@@ -44,9 +49,10 @@ fun CityListPage(viewModel: AirQualityViewModel= androidx.lifecycle.viewmodel.co
         }
 
     ){padding ->
-        Column(modifier = Modifier.padding(padding)
-            .padding(16.dp)
-            .fillMaxSize()
+        Column(modifier = Modifier
+	        .padding(padding)
+			.padding(16.dp)
+			.fillMaxSize()
         ) {
             OutlinedTextField(
                 value = cityInput.value,
@@ -101,12 +107,23 @@ fun CityListPage(viewModel: AirQualityViewModel= androidx.lifecycle.viewmodel.co
 							onCityClick(city.name)
 						},
 						onDelete = {
-							viewModel.deleteCity(city.name)
+							cn = city.name
+							viewModel.deleteCity(city)
 						}
 					)
 				}
 			}
         }
+		if(showDeleteDialog && !cn.isNullOrEmpty()){
+			AlertDialog(onDismissRequest = {showDeleteDialog=false},
+				title= { Text(cn) },
+				text={Text("Are you sure to delete this city? ${cn}")},
+				confirmButton = {Button(onClick={showDeleteDialog=false
+					viewModel.deleteCity(cn)
+				}){Text("Delete")}
+
+				}, dismissButton = {Button(onClick={showDeleteDialog=false}) { Text("Cancel")}})
+		}
     }
 
 }
@@ -117,6 +134,7 @@ fun CityRow(
 	onClick:() -> Unit,
 	onDelete:() -> Unit
 ){
+	//var showDeleteDialog by remember { mutableStateOf(false) }
 	Card(
 		modifier = Modifier
 			.padding(vertical = 6.dp)
@@ -129,10 +147,12 @@ fun CityRow(
 			.fillMaxWidth(),
 			horizontalArrangement = Arrangement.SpaceBetween
 		){
+
 			Text(city.name)
-			TextButton(onClick = onDelete){
+			TextButton(onClick =onDelete  ){
 				Text("Delete")
 			}
+
 		
 		}
 	}

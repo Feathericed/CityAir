@@ -31,6 +31,8 @@ import kotlinx.coroutines.withContext
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.json.JSONObject
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AirQualityDetailPage(
@@ -130,7 +132,7 @@ fun LoadCityAirAuqlityDetail(name: String,  modifier: Modifier = Modifier) {
 	// Launch API call in a coroutine scope tied to the Activity lifecycle
 	//kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO)
 	//.launch(   ) {
-	var post = WaqiResponse("ok",null)
+	var post by remember {mutableStateOf(value= WaqiResponse("ok",null)) }
 	CoroutineScope(Dispatchers.IO).launch {
 		try {
 			//val posts = //RetrofitClient.apiService.getAirQuality("toronto",temp)
@@ -154,11 +156,16 @@ fun LoadCityAirAuqlityDetail(name: String,  modifier: Modifier = Modifier) {
 		Text(text = "Status: ${post.status}", modifier = modifier)
 		Text(
 			text = "AQI: ${post.data?.aqi}",
+			modifier = modifier
+		)
+		Text(
+			text = "AQI: ${post.data?.aqi}",
 			color = aqiColor(post.data?.aqi),
 			modifier = modifier
 		)
 		Text(text="Station: ${post.data?.city?.name ?: "Unknow"}", modifier = modifier)
 		Text("Idx : ${post.data?.idx}", modifier = modifier)
+		Text("Update Time: ${post.data?.time?.s ?: "N/A"}")
 		Text("${resultText}",
 			modifier = modifier)
 		/*
@@ -257,4 +264,15 @@ fun AttributionSection(
 
 fun formatValue(value: Double?): String {
 	return value?.toString() ?: "N/A"
+}
+fun responseReader(json: String): WaqiResponse {
+	val jsonObject = JSONObject(json)
+	val status = jsonObject.getString("status")
+	val data = jsonObject.getJSONObject("data")
+	val aqi = data.getInt("aqi")
+	val idx = data.getInt("idx")
+	val attributions = data.getJSONArray("attributions")
+	val p= WaqiResponse("ok",null)
+	return p
+	//val WaqiResponse  = data.getJSONArray("attributions")
 }
